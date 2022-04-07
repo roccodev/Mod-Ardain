@@ -1,0 +1,29 @@
+# Function hooks, values are the instruction address to hook.
+[hooks]
+# Input/frame hook, this is right before the game checks for the emergency escape input sequence
+# (L+R+ZL+ZR+X+Down). Pressed buttons in w8
+input = 0x00_2b_58_dc
+# The save function from the "create blade" (resonance) menu.
+# This function can be NOPed to prevent saves and to speed up the animation.
+blade-create-save = 0x00_39_75_54
+# The function that returns the max quantity for base game (not Torna DLC) key items.
+key-item-max-quantity = 0x00_20_10_b0
+# The function that checks for a game condition (flag) to be set, specifically the instruction after the
+# condition's item ID is loaded.
+bdat-item-condition = 0x00_2a_41_80
+
+# Function pointers
+[functions]
+# Return to title screen
+return-title = 0x00_14_f5_60
+draw-font = 0x00_16_a2_58
+draw-font-color = 0x00_16_a3_3c
+draw-font-scale = 0
+
+# Register data for hooks
+# Format: [register type, register index]
+# Example: x1 = [x, 1]
+[registers]
+input-pad-data = ['w', 8]
+bdat-item-cond-id = ['w', 23]
+bdat-item-cond-type = ['w', 24]

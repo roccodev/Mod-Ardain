@@ -1,0 +1,26 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ] 
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  plugin:
+    runs-on: ubuntu-latest
+    container: 
+      image: jugeeya/cargo-skyline:2.1.0
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build release NRO
+      run: |
+        PATH=$PATH:/root/.cargo/bin /root/.cargo/bin/cargo-skyline skyline build --release
+      env:
+        HOME: /root
+    - name: Upload plugin artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: plugin
+        path: target/aarch64-skyline-switch/release/lib*.nro

@@ -1,0 +1,9 @@
+[xc2]
+# Game version, can be changed with the "XC2_VER" environment variable
+version = "2.1.0"
+
+[defaults]
+ui-visible = false
+blade-create-disable-save = false
+return-title = false
+infinite-flutterheart = false
