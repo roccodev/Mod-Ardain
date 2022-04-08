@@ -11,6 +11,7 @@ use skyline::hooks::Region;
 
 use crate::{ffi::FfiConfig, ui::text::TextRenderer};
 
+mod config;
 pub(crate) mod ffi;
 pub mod input;
 pub mod ui;
@@ -93,6 +94,7 @@ pub fn main() {
     unsafe {
         ffi::hooks::install_all(&STATE.get().unwrap(), &config);
     }
+
     println!("[XC2MM] Loaded!");
 }
 

@@ -1,4 +1,4 @@
-use std::{ffi::CString, lazy::SyncOnceCell, sync::atomic::Ordering};
+use std::{ffi::CString, fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
 
 use crate::{
     ffi::{FfiConfig, Offset, Register, RegisterValue},
@@ -17,6 +17,7 @@ pub(crate) struct Offsets {
     input_register: Register,
     bdat_item_id: Option<Register>,
     bdat_item_type: Option<Register>,
+    chain_attack_rate_branch: Option<Register>,
 }
 
 impl Offsets {
@@ -28,6 +29,7 @@ impl Offsets {
                 .expect("input offset required"),
             bdat_item_id: config.get_register("bdat-item-cond-id"),
             bdat_item_type: config.get_register("bdat-item-cond-type"),
+            chain_attack_rate_branch: config.get_register("chain-attack-rate-branch"),
         }
     }
 }
@@ -48,6 +50,9 @@ pub(crate) unsafe fn install_all(platform: &PlatformData, config: &FfiConfig) {
                 hook.patch(platform, key_item_max_quantity as *const c_void),
             ))
             .unwrap();
+    }
+    if let Some(hook) = config.get_hook("chain-attack-enemy-atk-rate") {
+        hook.patch_inline(platform, chain_attack_rate_fix);
     }
 }
 
@@ -139,4 +144,17 @@ unsafe extern "C" fn key_item_max_quantity(ptr: u64, id: u32) -> u64 {
             std::mem::transmute(KEY_ITEM_MAX_QTY_ORIG.get().unwrap().inner() as *const ());
         (orig)(ptr, id)
     }
+}
+
+unsafe extern "C" fn chain_attack_rate_fix(inline_ctx: &mut InlineCtx) {
+    // When "Enemy Attack Power" is > 1.0 and the number of "Cancel Attacks" is > 0,
+    // the chain attack base damage rate glitches out to 100%, regardless of any
+    // other bonuses.
+    //
+    // We tweak the branch so it unconditionally skips this check.
+    get_platform_data()
+        .ffi_offsets
+        .chain_attack_rate_branch
+        .expect("branch offset required for chain attack fix")
+        .set(inline_ctx, RegisterValue::RW(1));
 }

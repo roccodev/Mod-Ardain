@@ -11,6 +11,9 @@ key-item-max-quantity = 0x00_20_10_b0
 # The function that checks for a game condition (flag) to be set, specifically the instruction after the
 # condition's item ID is loaded.
 bdat-item-condition = 0x00_2a_41_80
+# A fix for chain attack damage rate resetting on Enemy Attack Power > 1.0 (Custom, Bringer of Chaos).
+# Value for the conditional branch in w12
+chain-attack-enemy-atk-rate = 0x00_02_0e_50
 
 # Function pointers
 [functions]
@@ -27,3 +30,4 @@ draw-font-scale = 0
 input-pad-data = ['w', 8]
 bdat-item-cond-id = ['w', 23]
 bdat-item-cond-type = ['w', 24]
+chain-attack-rate-branch = ['w', 12]
