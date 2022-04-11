@@ -16,7 +16,7 @@ pub(crate) mod ffi;
 pub mod input;
 pub mod ui;
 
-pub static VERSION_STRING: &str = concat!("XC2 Mod Menu Ver. ", env!("CARGO_PKG_VERSION"), '\0');
+pub static VERSION_STRING: &str = concat!("Mod Ardain Ver. ", env!("CARGO_PKG_VERSION"), '\0');
 static STATE: SyncOnceCell<PlatformData> = SyncOnceCell::new();
 
 #[derive(Debug)]
