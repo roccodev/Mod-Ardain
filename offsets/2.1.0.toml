@@ -14,6 +14,10 @@ bdat-item-condition = 0x00_2a_41_80
 # A fix for chain attack damage rate resetting on Enemy Attack Power > 1.0 (Custom, Bringer of Chaos).
 # Value for the conditional branch in w12
 chain-attack-enemy-atk-rate = 0x00_02_0e_50
+# Called when the title screen is loaded, but before child objects are loaded.
+# Root object pointer in x0
+title-screen-load = 0x00_48_90_38
+
 
 # Function pointers
 [functions]
@@ -22,6 +26,21 @@ return-title = 0x00_14_f5_60
 draw-font = 0x00_16_a2_58
 draw-font-color = 0x00_16_a3_3c
 draw-font-scale = 0
+# UIObjectAcc (constructor)
+ui-acc-con = 0x00_69_00_58
+# UIObjectAcc (destructor)
+ui-acc-des = 0x00_69_01_30
+# UIObjectAcc (setPos)
+ui-acc-pos = 0x00_69_06_7c
+# UIObjectAcc (setText)
+ui-acc-text = 0x00_69_0c_e4
+# UIObjectAcc (duplicateChild)
+ui-acc-dup-child = 0x00_69_0b_b4
+# UIStr (constructor)
+ui-str-con = 0x00_69_49_20
+# UIStr (destructor)
+ui-str-des = 0x00_69_49_5c
+
 
 # Register data for hooks
 # Format: [register type, register index]
@@ -31,3 +50,4 @@ input-pad-data = ['w', 8]
 bdat-item-cond-id = ['w', 23]
 bdat-item-cond-type = ['w', 24]
 chain-attack-rate-branch = ['w', 12]
+title-root = ['x', 0]

@@ -1,5 +1,6 @@
 #![feature(proc_macro_hygiene)]
 #![feature(once_cell)]
+#![feature(asm)]
 
 use std::{
     io::Cursor,
@@ -16,10 +17,11 @@ pub(crate) mod ffi;
 pub mod input;
 pub mod ui;
 
+pub static VERSION_STRING: &str = concat!("XC2 Mod Menu Ver. ", env!("CARGO_PKG_VERSION"), '\0');
 static STATE: SyncOnceCell<PlatformData> = SyncOnceCell::new();
 
 #[derive(Debug)]
-pub(crate) struct PlatformData {
+pub struct PlatformData {
     pub text_renderer: TextRenderer,
     pub text_ptr: StaticPtr,
     pub ui_visible: AtomicBool,
@@ -29,7 +31,7 @@ pub(crate) struct PlatformData {
 
 /// A pointer to read-only memory.
 #[derive(Clone, Copy, Debug)]
-struct StaticPtr(*const u8);
+pub struct StaticPtr(*const u8);
 
 // These are immutable pointers to a section of the program's code.
 // They are thread-safe, and they're also already unsafe to dereference.

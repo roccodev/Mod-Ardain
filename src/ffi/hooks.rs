@@ -1,7 +1,11 @@
 use std::{ffi::CString, fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
 
 use crate::{
-    ffi::{FfiConfig, Offset, Register, RegisterValue},
+    c_str,
+    ffi::{
+        ui::{Point, UIObjectAcc, UIStr},
+        FfiConfig, Offset, Register, RegisterValue,
+    },
     get_platform_data,
     input::{PadButton, PadData},
     ui::text::Text,
@@ -9,19 +13,30 @@ use crate::{
 };
 use skyline::{hooks::InlineCtx, libc::c_void};
 
+use super::ui::UiOffsets;
+
 static KEY_ITEM_MAX_QTY_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Offsets {
+pub struct Offsets {
     return_title: Option<Offset>,
     input_register: Register,
     bdat_item_id: Option<Register>,
     bdat_item_type: Option<Register>,
     chain_attack_rate_branch: Option<Register>,
+    title_root_register: Option<Register>,
+    pub ui_offsets: Option<UiOffsets>,
 }
 
 impl Offsets {
     pub fn read_all(config: &FfiConfig) -> Self {
+        let ui_offsets = match UiOffsets::load(config) {
+            Ok(o) => Some(o),
+            Err(e) => {
+                println!("[XC2MM] Couldn't load UI offsets, missing fn {:?}", e);
+                None
+            }
+        };
         Self {
             return_title: config.get_function("return-title"),
             input_register: config
@@ -30,6 +45,8 @@ impl Offsets {
             bdat_item_id: config.get_register("bdat-item-cond-id"),
             bdat_item_type: config.get_register("bdat-item-cond-type"),
             chain_attack_rate_branch: config.get_register("chain-attack-rate-branch"),
+            title_root_register: config.get_register("title-root"),
+            ui_offsets,
         }
     }
 }
@@ -53,6 +70,9 @@ pub(crate) unsafe fn install_all(platform: &PlatformData, config: &FfiConfig) {
     }
     if let Some(hook) = config.get_hook("chain-attack-enemy-atk-rate") {
         hook.patch_inline(platform, chain_attack_rate_fix);
+    }
+    if let Some(hook) = config.get_hook("title-screen-load") {
+        hook.patch_inline(platform, title_screen_load);
     }
 }
 
@@ -155,6 +175,26 @@ unsafe extern "C" fn chain_attack_rate_fix(inline_ctx: &mut InlineCtx) {
     get_platform_data()
         .ffi_offsets
         .chain_attack_rate_branch
-        .expect("branch offset required for chain attack fix")
+        .expect("branch register required for chain attack fix")
         .set(inline_ctx, RegisterValue::RW(1));
+}
+
+unsafe extern "C" fn title_screen_load(inline_ctx: &mut InlineCtx) {
+    let platform = get_platform_data();
+    if platform.ffi_offsets.ui_offsets.is_some() {
+        if let Some(root) = platform.ffi_offsets.title_root_register {
+            let root_obj = UIObjectAcc::from_ptr(platform, root.get(inline_ctx) as *const _);
+            if let Some(root_obj) = root_obj {
+                let dup_id = root_obj.duplicate_child(c_str!("TXT_copyright"));
+                let dup = UIObjectAcc::new_from_id(platform, dup_id);
+
+                let text = UIStr::new(platform, crate::VERSION_STRING.as_ptr() as *const _, false);
+
+                // It's important that we set the position first, as setting
+                // the text shifts the object to keep horizontal alignment.
+                dup.set_pos(Point(920, 60));
+                dup.set_text(&text);
+            }
+        }
+    }
 }
