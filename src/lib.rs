@@ -1,6 +1,5 @@
 #![feature(proc_macro_hygiene)]
 #![feature(once_cell)]
-#![feature(asm)]
 
 use std::{
     io::Cursor,
