@@ -3,6 +3,7 @@ use crate::{ffi::FfiConfig, PlatformData};
 use render::Renderer;
 
 pub mod container;
+pub mod overlay;
 mod render;
 pub mod text;
 

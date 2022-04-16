@@ -47,10 +47,10 @@ impl<'p> Renderer<'p> {
         }
     }
 
-    pub fn text(&self, point: Point, text: Text<'_>) {
+    pub fn text(&self, point: Point, text: &Text<'_>) {
         self.platform
             .text_renderer
-            .draw_text(self.platform, point.x as i32, point.z as i32, &text);
+            .draw_text(self.platform, point.x as i32, point.z as i32, text);
     }
 
     pub fn rect(&self, rect: &Rect, color: &Color4f) {

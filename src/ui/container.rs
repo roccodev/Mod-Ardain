@@ -1,28 +1,29 @@
-use std::{cell::Cell, convert::TryInto, num::NonZeroUsize};
+use std::{borrow::Cow, cell::Cell, convert::TryInto, num::NonZeroUsize};
 
 use super::{render::Renderer, Color4f, Point, Rect, Widget};
 
 type ListIndex = NonZeroUsize;
 
-pub struct Container<'w> {
+pub struct Container {
     dimensions: (u32, u32),
     color: Color4f,
-    children: Vec<&'w dyn Widget>,
+    children: Vec<Box<dyn Widget>>,
 }
 
-pub struct List<'c> {
+pub struct List {
     selectable: bool,
     selected: Cell<Option<NonZeroUsize>>,
+    handler: Box<dyn ListHandler>,
     max_height: u32,
-    children: Vec<Container<'c>>,
+    children: Vec<Container>,
 }
 
 pub trait ListHandler {
-    fn on_select(list: &List<'_>, from: Option<ListIndex>, to: ListIndex);
+    fn on_select(&self, list: &List, from: Option<ListIndex>, to: ListIndex);
 }
 
-impl<'w> Container<'w> {
-    pub fn new(color: Color4f, dimensions: (u32, u32), items: Vec<&'w dyn Widget>) -> Self {
+impl Container {
+    pub fn new(color: Color4f, dimensions: (u32, u32), items: Vec<Box<dyn Widget>>) -> Self {
         Self {
             dimensions,
             color,
@@ -31,19 +32,19 @@ impl<'w> Container<'w> {
     }
 }
 
-impl<'c> List<'c> {
+impl List {
     pub fn push<W: Into<Box<dyn Widget>>>(&mut self, widget: W) {
         let widget = widget.into();
-        let wrapped = Container {
-            dimensions: (widget.get_width(), widget.get_height()), // TODO set from parent
-            color: Color4f::default(),
-            children: vec![/*&widget*/],
-        };
+        let wrapped = Container::new(
+            Color4f::default(),
+            (widget.get_width(), widget.get_height()),
+            vec![widget.into()],
+        );
         self.children.push(wrapped);
     }
 }
 
-impl<'w> Widget for Container<'w> {
+impl Widget for Container {
     fn render(&self, base_pos: &Point, renderer: &Renderer<'_>) {
         renderer.rect(
             &Rect::from_point_dimensions(*base_pos, self.dimensions),
@@ -65,7 +66,7 @@ impl<'w> Widget for Container<'w> {
     }
 }
 
-impl<'c> Widget for List<'c> {
+impl Widget for List {
     fn render(&self, base_pos: &Point, renderer: &Renderer<'_>) {
         let mut pos = *base_pos;
         let selected = self.selected.get().map(|i| i.get()).unwrap_or(0);
@@ -82,7 +83,7 @@ impl<'c> Widget for List<'c> {
     }
 
     fn get_width(&self) -> u32 {
-        0 // TODO: from parent
+        100 // TODO: from parent
     }
 
     fn get_height(&self) -> u32 {

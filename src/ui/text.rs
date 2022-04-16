@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 
-use skyline::libc::c_char;
+use skyline::libc::{c_char, c_void};
 
 use crate::{
     ffi::{FfiConfig, Offset},
@@ -20,6 +20,7 @@ pub struct Text<'s> {
     text: &'s CStr,
     color: Option<Color4f>,
     scale: f32,
+    shadow: bool,
 }
 
 pub struct TextWidget<'s> {
@@ -40,11 +41,12 @@ impl TextRenderer {
 }
 
 impl<'s> Text<'s> {
-    pub fn new<'t: 's, T: 't + AsRef<CStr>>(text: &'t T) -> Text<'s> {
+    pub fn new<'t: 's, T: 't + AsRef<CStr> + ?Sized>(text: &'t T) -> Text<'s> {
         Self {
             text: text.as_ref(),
             color: None,
             scale: 0f32,
+            shadow: false,
         }
     }
 
@@ -57,6 +59,10 @@ impl<'s> Text<'s> {
 
     pub fn scale(self, scale: f32) -> Text<'s> {
         Self { scale, ..self }
+    }
+
+    pub fn shadow(self, shadow: bool) -> Text<'s> {
+        Self { shadow, ..self }
     }
 }
 
@@ -72,12 +78,8 @@ impl TextRenderer {
             }
         }
         if text.scale != 0f32 {
-            if let Some(draw_text_scale_fn) = self.draw_text_scale_fn {
-                unsafe {
-                    let f: extern "C" fn(f32, f32) =
-                        std::mem::transmute(draw_text_scale_fn.as_fn(platform));
-                    (f)(text.scale, text.scale);
-                }
+            unsafe {
+                self.set_scale(platform, (text.scale, text.scale));
             }
         }
         unsafe {
@@ -85,6 +87,24 @@ impl TextRenderer {
                 std::mem::transmute(self.draw_text_fn.as_fn(platform));
             (f)(x as i16, y as i16, text.text.as_ptr() as *const u8);
         }
+    }
+
+    unsafe fn set_scale(&self, platform: &PlatformData, scale: (f32, f32)) {
+        let set_scale_fn = match self.draw_text_scale_fn {
+            Some(f) => f,
+            None => return,
+        };
+        // CacheDraw::fontScale is inlined in 2.1.0, thus we call
+        // FontLayer::fontScale, which will use the DevFontLayer if DebDraw
+        // hasn't been initialized.
+        // In that case we need to skip it, so we give a special pointer so that
+        // *(ptr + 8) == 0, i.e. *((ptr as *const u64).offset(1)) == 0
+        let buf = [0u64; 2];
+        offset_fn!(platform, set_scale_fn, (*const c_void, f32, f32))(
+            buf.as_ptr() as *const _,
+            scale.0,
+            scale.1,
+        );
     }
 }
 
@@ -96,13 +116,9 @@ impl<'s> TextWidget<'s> {
 
 impl<'s> Widget for TextWidget<'s> {
     fn render(&self, base_pos: &super::Point, renderer: &super::render::Renderer) {
-        let platform = get_platform_data();
-        platform.text_renderer.draw_text(
-            &platform,
-            (base_pos.x + self.pos.x).into(),
-            (base_pos.z + self.pos.z).into(),
-            &self.text,
-        );
+        let mut point = *base_pos;
+        point.add(self.pos.x, self.pos.z);
+        renderer.text(point, &self.text);
     }
 
     fn get_width(&self) -> u32 {

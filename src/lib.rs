@@ -1,5 +1,6 @@
 #![feature(proc_macro_hygiene)]
 #![feature(once_cell)]
+#![feature(box_syntax)]
 
 use std::{
     io::Cursor,

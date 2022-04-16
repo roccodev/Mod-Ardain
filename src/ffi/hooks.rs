@@ -122,20 +122,9 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
     }
 
     if platform.ui_visible.load(Ordering::Relaxed) {
-        render_ui_overlay(platform);
-    }
-}
-
-unsafe fn render_ui_overlay(platform: &PlatformData) {
-    if let Some(renderer) = crate::ui::get_renderer() {
-        let screen = renderer.get_screen_dimensions();
-        let half_width = screen.0 / 2;
-        let root = Container::new(
-            Color4f::from_rgba(0.0, 0.0, 0.0, 0.7),
-            (half_width, screen.1),
-            vec![],
-        );
-        root.render(&Point::new(half_width.try_into().unwrap(), 0), renderer);
+        if let Some(renderer) = crate::ui::get_renderer() {
+            crate::ui::overlay::render(platform, renderer, inputs);
+        }
     }
 }
 
