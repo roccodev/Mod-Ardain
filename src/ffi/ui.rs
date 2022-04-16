@@ -1,16 +1,12 @@
 use skyline::libc::{c_char, c_void};
 
-use crate::PlatformData;
-
 use super::{owned::FfiPointer, FfiConfig, Offset};
+use crate::ui::Point;
+use crate::PlatformData;
 
 // Sizes as of XC2 2.1.0
 const UI_STR_SIZE: usize = 20;
 const UI_OBJ_ACC_SIZE: usize = 20;
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct Point(pub i16, pub i16);
 
 #[derive(Clone, Copy, Debug)]
 pub struct UiOffsets {

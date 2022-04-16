@@ -4,12 +4,22 @@
 use std::{
     io::Cursor,
     lazy::SyncOnceCell,
+    ops::Add,
     sync::atomic::{AtomicBool, AtomicU32},
 };
 
-use skyline::hooks::Region;
+use skyline::{
+    hooks::{InlineCtx, Region},
+    libc::c_void,
+};
 
-use crate::{ffi::FfiConfig, ui::text::TextRenderer};
+use crate::{
+    ffi::FfiConfig,
+    ui::{text::TextRenderer, Color4f, Point, Rect},
+};
+
+#[macro_use]
+pub(crate) mod macros;
 
 mod config;
 pub(crate) mod ffi;
@@ -90,6 +100,7 @@ pub fn main() {
         ffi_offsets: ffi::hooks::Offsets::read_all(&config),
     };
     STATE.set(state).unwrap();
+    ui::load(&config, STATE.get().unwrap());
 
     println!("[XC2MM] Installing hooks");
     unsafe {

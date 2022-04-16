@@ -10,13 +10,6 @@ pub mod hooks;
 pub mod owned;
 mod ui;
 
-#[macro_export]
-macro_rules! c_str {
-    ($st:expr) => {
-        concat!($st, '\0').as_ptr() as *const ::skyline::libc::c_char
-    };
-}
-
 #[derive(Deserialize, Debug)]
 pub struct FfiConfig {
     hooks: HashMap<String, Offset>,

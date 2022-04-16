@@ -2,7 +2,7 @@
 [hooks]
 # Input/frame hook, this is right before the game checks for the emergency escape input sequence
 # (L+R+ZL+ZR+X+Down). Pressed buttons in w8
-input = 0x00_2b_58_dc
+input = 0x00_2b_58_dc# #0x
 # The save function from the "create blade" (resonance) menu.
 # This function can be NOPed to prevent saves and to speed up the animation.
 blade-create-save = 0x00_39_75_54
@@ -26,6 +26,9 @@ return-title = 0x00_14_f5_60
 draw-font = 0x00_16_a2_58
 draw-font-color = 0x00_16_a3_3c
 draw-font-scale = 0
+draw-square-2d = 0x00_16_a4_48
+# When set to false, ignores Z coordinate and always draws on top
+draw-compare-z = 0x00_16_a9_44
 # UIObjectAcc (constructor)
 ui-acc-con = 0x00_69_00_58
 # UIObjectAcc (destructor)
@@ -40,6 +43,12 @@ ui-acc-dup-child = 0x00_69_0b_b4
 ui-str-con = 0x00_69_49_20
 # UIStr (destructor)
 ui-str-des = 0x00_69_49_5c
+render-get = 0x00_69_8b_6c
+render-set-color = 0x00_69_d0_5c
+render-rect-fill = 0x00_69_d4_e8
+render-rect-outline = 0
+render-scr-width = 0x00_69_73_38
+render-scr-height = 0x00_69_73_64
 
 
 # Register data for hooks

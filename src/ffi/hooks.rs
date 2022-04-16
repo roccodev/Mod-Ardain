@@ -1,14 +1,17 @@
-use std::{ffi::CString, fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
+use std::{convert::TryInto, ffi::CString, fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
 
 use crate::{
-    c_str,
     ffi::{
-        ui::{Point, UIObjectAcc, UIStr},
+        ui::{UIObjectAcc, UIStr},
         FfiConfig, Offset, Register, RegisterValue,
     },
     get_platform_data,
     input::{PadButton, PadData},
-    ui::text::Text,
+    ui::{container::Container, Color4f, Point, Rect},
+    ui::{
+        text::{Text, TextWidget},
+        Widget,
+    },
     PlatformData, StaticPtr,
 };
 use skyline::{hooks::InlineCtx, libc::c_void};
@@ -25,6 +28,8 @@ pub struct Offsets {
     bdat_item_type: Option<Register>,
     chain_attack_rate_branch: Option<Register>,
     title_root_register: Option<Register>,
+    pub draw_square_2d: Option<Offset>,
+    draw_compare_z: Option<Offset>,
     pub ui_offsets: Option<UiOffsets>,
 }
 
@@ -46,6 +51,8 @@ impl Offsets {
             bdat_item_type: config.get_register("bdat-item-cond-type"),
             chain_attack_rate_branch: config.get_register("chain-attack-rate-branch"),
             title_root_register: config.get_register("title-root"),
+            draw_square_2d: config.get_function("draw-square-2d"),
+            draw_compare_z: config.get_function("draw-compare-z"),
             ui_offsets,
         }
     }
@@ -114,15 +121,21 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
         platform.no_input_frames.store(0, Ordering::Relaxed);
     }
 
-    // Render UI
     if platform.ui_visible.load(Ordering::Relaxed) {
-        let text = CString::new("XC2 Mod Menu").unwrap();
-        platform.text_renderer.draw_text(
-            platform,
-            0,
-            0,
-            Text::new(&text).color(0.0, 0.0, 1.0, 1.0),
+        render_ui_overlay(platform);
+    }
+}
+
+unsafe fn render_ui_overlay(platform: &PlatformData) {
+    if let Some(renderer) = crate::ui::get_renderer() {
+        let screen = renderer.get_screen_dimensions();
+        let half_width = screen.0 / 2;
+        let root = Container::new(
+            Color4f::from_rgba(0.0, 0.0, 0.0, 0.7),
+            (half_width, screen.1),
+            vec![],
         );
+        root.render(&Point::new(half_width.try_into().unwrap(), 0), renderer);
     }
 }
 
@@ -192,7 +205,7 @@ unsafe extern "C" fn title_screen_load(inline_ctx: &mut InlineCtx) {
 
                 // It's important that we set the position first, as setting
                 // the text shifts the object to keep horizontal alignment.
-                dup.set_pos(Point(920, 60));
+                dup.set_pos(Point::new(920, 60));
                 dup.set_text(&text);
             }
         }

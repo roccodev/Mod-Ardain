@@ -7,7 +7,6 @@ license = "GPL-3.0"
 
 [package.metadata.skyline]
 titleid = "0100E95004038000" # Xenoblade Chronicles 2
-subsdk-name = "subsdk2"
 custom-npdm = "npdm/xc2.npdm"
 
 [lib]

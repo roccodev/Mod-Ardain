@@ -1,13 +1,13 @@
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 
 use skyline::libc::c_char;
 
 use crate::{
     ffi::{FfiConfig, Offset},
-    PlatformData,
+    get_platform_data, PlatformData,
 };
 
-use super::Color4f;
+use super::{Color4f, Point, Widget};
 
 #[derive(Debug)]
 pub struct TextRenderer {
@@ -20,6 +20,11 @@ pub struct Text<'s> {
     text: &'s CStr,
     color: Option<Color4f>,
     scale: f32,
+}
+
+pub struct TextWidget<'s> {
+    text: Text<'s>,
+    pos: Point,
 }
 
 impl TextRenderer {
@@ -56,7 +61,7 @@ impl<'s> Text<'s> {
 }
 
 impl TextRenderer {
-    pub(crate) fn draw_text<'s>(&self, platform: &PlatformData, x: i32, y: i32, text: Text<'s>) {
+    pub(crate) fn draw_text<'s>(&self, platform: &PlatformData, x: i32, y: i32, text: &Text<'s>) {
         if let Some(color) = text.color {
             if let Some(draw_text_color_fn) = self.draw_text_color_fn {
                 unsafe {
@@ -76,9 +81,35 @@ impl TextRenderer {
             }
         }
         unsafe {
-            let f: extern "C" fn(i32, i32, *const c_char) =
+            let f: extern "C" fn(i16, i16, *const c_char) =
                 std::mem::transmute(self.draw_text_fn.as_fn(platform));
-            (f)(x, y, text.text.as_ptr() as *const u8);
+            (f)(x as i16, y as i16, text.text.as_ptr() as *const u8);
         }
+    }
+}
+
+impl<'s> TextWidget<'s> {
+    pub fn new(text: Text<'s>, pos: Point) -> Self {
+        Self { text, pos }
+    }
+}
+
+impl<'s> Widget for TextWidget<'s> {
+    fn render(&self, base_pos: &super::Point, renderer: &super::render::Renderer) {
+        let platform = get_platform_data();
+        platform.text_renderer.draw_text(
+            &platform,
+            (base_pos.x + self.pos.x).into(),
+            (base_pos.z + self.pos.z).into(),
+            &self.text,
+        );
+    }
+
+    fn get_width(&self) -> u32 {
+        0 // TODO
+    }
+
+    fn get_height(&self) -> u32 {
+        0 // TODO
     }
 }
