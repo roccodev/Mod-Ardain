@@ -87,6 +87,13 @@ impl TextRenderer {
                 std::mem::transmute(self.draw_text_fn.as_fn(platform));
             (f)(x as i16, y as i16, text.text.as_ptr() as *const u8);
         }
+
+        // Reset state
+        if text.scale != 0f32 {
+            unsafe {
+                self.set_scale(platform, (1.0, 1.0));
+            }
+        }
     }
 
     unsafe fn set_scale(&self, platform: &PlatformData, scale: (f32, f32)) {
@@ -112,6 +119,10 @@ impl<'s> TextWidget<'s> {
     pub fn new(text: Text<'s>, pos: Point) -> Self {
         Self { text, pos }
     }
+
+    pub fn at_root(text: Text<'s>) -> Self {
+        Self::new(text, Point::default())
+    }
 }
 
 impl<'s> Widget for TextWidget<'s> {
@@ -122,10 +133,10 @@ impl<'s> Widget for TextWidget<'s> {
     }
 
     fn get_width(&self) -> u32 {
-        0 // TODO
+        100 // TODO
     }
 
     fn get_height(&self) -> u32 {
-        0 // TODO
+        20 // TODO
     }
 }

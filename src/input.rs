@@ -97,3 +97,11 @@ impl BitOr for PadButton {
         self.add(rhs)
     }
 }
+
+impl Default for PadData {
+    fn default() -> Self {
+        Self {
+            buttons: Default::default(),
+        }
+    }
+}

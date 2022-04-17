@@ -123,7 +123,15 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
 
     if platform.ui_visible.load(Ordering::Relaxed) {
         if let Some(renderer) = crate::ui::get_renderer() {
-            crate::ui::overlay::render(platform, renderer, inputs);
+            crate::ui::overlay::render(
+                platform,
+                renderer,
+                if had_input {
+                    inputs
+                } else {
+                    PadData::default()
+                },
+            );
         }
     }
 }

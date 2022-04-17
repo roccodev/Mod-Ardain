@@ -41,8 +41,12 @@ pub fn get_renderer() -> Option<&'static Renderer<'static>> {
 }
 
 impl Point {
-    pub fn new(x: i16, z: i16) -> Point {
+    pub const fn new(x: i16, z: i16) -> Point {
         Self { x, z }
+    }
+
+    pub const fn default() -> Self {
+        Self::new(0, 0)
     }
 
     pub fn add(&mut self, x: i16, z: i16) {
@@ -96,6 +100,12 @@ impl Rect {
 }
 
 impl Default for Color4f {
+    fn default() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for Point {
     fn default() -> Self {
         Self::default()
     }

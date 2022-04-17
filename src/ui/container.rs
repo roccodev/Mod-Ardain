@@ -1,8 +1,13 @@
-use std::{borrow::Cow, cell::Cell, convert::TryInto, num::NonZeroUsize};
+use std::{
+    borrow::Cow,
+    cell::Cell,
+    convert::TryInto,
+    num::{NonZeroU32, NonZeroUsize},
+};
 
 use super::{render::Renderer, Color4f, Point, Rect, Widget};
 
-type ListIndex = NonZeroUsize;
+pub type ListIndex = NonZeroUsize;
 
 pub struct Container {
     dimensions: (u32, u32),
@@ -14,7 +19,7 @@ pub struct List {
     selectable: bool,
     selected: Cell<Option<NonZeroUsize>>,
     handler: Box<dyn ListHandler>,
-    max_height: u32,
+    max_height: Option<NonZeroU32>,
     children: Vec<Container>,
 }
 
@@ -33,12 +38,26 @@ impl Container {
 }
 
 impl List {
-    pub fn push<W: Into<Box<dyn Widget>>>(&mut self, widget: W) {
+    pub fn new(
+        selectable: bool,
+        max_height: Option<NonZeroU32>,
+        handler: Box<dyn ListHandler>,
+    ) -> Self {
+        Self {
+            selectable,
+            selected: Cell::new(None),
+            handler,
+            max_height,
+            children: Vec::new(),
+        }
+    }
+
+    pub fn push<W: 'static + Widget, B: Into<Box<W>>>(&mut self, widget: B) {
         let widget = widget.into();
         let wrapped = Container::new(
             Color4f::default(),
             (widget.get_width(), widget.get_height()),
-            vec![widget.into()],
+            vec![widget],
         );
         self.children.push(wrapped);
     }
@@ -69,9 +88,13 @@ impl Widget for Container {
 impl Widget for List {
     fn render(&self, base_pos: &Point, renderer: &Renderer<'_>) {
         let mut pos = *base_pos;
-        let selected = self.selected.get().map(|i| i.get()).unwrap_or(0);
+        let selected = self
+            .selected
+            .get()
+            .map(NonZeroUsize::get)
+            .unwrap_or_default();
         for (i, child) in self.children.iter().enumerate() {
-            if i == selected - 1 {
+            if selected > 0 && i == selected - 1 {
                 renderer.rect(
                     &Rect::from_point_dimensions(pos, (self.get_width(), child.get_height())),
                     &Color4f::from_rgba(1.0, 0.0, 0.0, 0.8),
@@ -88,9 +111,10 @@ impl Widget for List {
 
     fn get_height(&self) -> u32 {
         let mut height = 0;
+        let max_height = self.max_height.map(NonZeroU32::get).unwrap_or_default();
         for child in &self.children {
             let child_height = child.get_height();
-            if height + child_height > self.max_height {
+            if max_height > 0 && height + child_height > max_height {
                 return height;
             }
             height += child_height;
