@@ -88,16 +88,17 @@ pub(crate) unsafe fn install_all(platform: &PlatformData, config: &FfiConfig) {
 unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
     let platform = crate::get_platform_data();
     let inputs = PadData::from(platform.ffi_offsets.input_register.get(inline_ctx));
+    let can_input = platform.no_input_frames.fetch_add(1, Ordering::Relaxed) >= 10;
 
-    let had_input = if platform.no_input_frames.fetch_add(1, Ordering::Relaxed) >= 10 {
-        if inputs.contains(&(PadButton::L + PadButton::LeftStickClick)) {
+    let had_input = if can_input {
+        if inputs.contains(PadButton::L + PadButton::LeftStickClick) {
             // Toggle UI visibility
             platform
                 .ui_visible
                 .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |b| Some(!b))
                 .ok();
             true
-        } else if inputs.contains(&(PadButton::L + PadButton::R + PadButton::A + PadButton::Plus)) {
+        } else if inputs.contains(PadButton::L + PadButton::R + PadButton::A + PadButton::Plus) {
             // Return to title
             match platform.ffi_offsets.return_title {
                 Some(return_title) => {
@@ -126,7 +127,8 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
             crate::ui::overlay::render(
                 platform,
                 renderer,
-                if had_input {
+                if can_input {
+                    // TODO: Disable in-game inputs
                     inputs
                 } else {
                     PadData::default()

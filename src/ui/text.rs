@@ -4,7 +4,9 @@ use skyline::libc::{c_char, c_void};
 
 use crate::{
     ffi::{FfiConfig, Offset},
-    get_platform_data, PlatformData,
+    get_platform_data,
+    input::PadData,
+    PlatformData,
 };
 
 use super::{Color4f, Point, Widget};
@@ -16,6 +18,7 @@ pub struct TextRenderer {
     draw_text_scale_fn: Option<Offset>,
 }
 
+#[derive(Debug)]
 pub struct Text<'s> {
     text: &'s CStr,
     color: Option<Color4f>,
@@ -23,6 +26,7 @@ pub struct Text<'s> {
     shadow: bool,
 }
 
+#[derive(Debug)]
 pub struct TextWidget<'s> {
     text: Text<'s>,
     pos: Point,
@@ -130,6 +134,10 @@ impl<'s> Widget for TextWidget<'s> {
         let mut point = *base_pos;
         point.add(self.pos.x, self.pos.z);
         renderer.text(point, &self.text);
+    }
+
+    fn handle_input(&self, inputs: PadData) {
+        // no-op
     }
 
     fn get_width(&self) -> u32 {

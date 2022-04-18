@@ -2,19 +2,24 @@ use std::{
     borrow::Cow,
     cell::Cell,
     convert::TryInto,
+    fmt::Debug,
     num::{NonZeroU32, NonZeroUsize},
 };
+
+use crate::input::{self, PadButton, PadData};
 
 use super::{render::Renderer, Color4f, Point, Rect, Widget};
 
 pub type ListIndex = NonZeroUsize;
 
+#[derive(Debug)]
 pub struct Container {
     dimensions: (u32, u32),
     color: Color4f,
     children: Vec<Box<dyn Widget>>,
 }
 
+#[derive(Debug)]
 pub struct List {
     selectable: bool,
     selected: Cell<Option<NonZeroUsize>>,
@@ -23,7 +28,7 @@ pub struct List {
     children: Vec<Container>,
 }
 
-pub trait ListHandler {
+pub trait ListHandler: Debug {
     fn on_select(&self, list: &List, from: Option<ListIndex>, to: ListIndex);
 }
 
@@ -76,6 +81,12 @@ impl Widget for Container {
         }
     }
 
+    fn handle_input(&self, inputs: PadData) {
+        for child in &self.children {
+            child.handle_input(inputs);
+        }
+    }
+
     fn get_width(&self) -> u32 {
         self.dimensions.0
     }
@@ -102,6 +113,42 @@ impl Widget for List {
             }
             child.render(&pos, renderer);
             pos.add(0, child.get_height().try_into().unwrap());
+        }
+    }
+
+    fn handle_input(&self, inputs: PadData) {
+        if !self.selectable {
+            return;
+        }
+        if inputs.contains(PadButton::LeftStickDown) || inputs.contains(PadButton::DpadDown) {
+            self.selected.update(|old| {
+                let new_index = old
+                    .map(NonZeroUsize::get)
+                    .unwrap_or_default()
+                    .saturating_add(1);
+                if new_index - 1 >= self.children.len() {
+                    old
+                } else {
+                    Some(unsafe { NonZeroUsize::new_unchecked(new_index) })
+                }
+            });
+        } else if inputs.contains(PadButton::LeftStickUp) || inputs.contains(PadButton::DpadUp) {
+            self.selected.update(|old| {
+                let new_index = old
+                    .map(NonZeroUsize::get)
+                    .unwrap_or_default()
+                    .saturating_sub(1)
+                    .max(1);
+                if new_index - 1 >= self.children.len() {
+                    old
+                } else {
+                    Some(unsafe { NonZeroUsize::new_unchecked(new_index) })
+                }
+            });
+        } else if let Some(selected) = self.selected.get() {
+            // Propagate inputs to children
+            let item = &self.children[selected.get() - 1];
+            item.handle_input(inputs);
         }
     }
 

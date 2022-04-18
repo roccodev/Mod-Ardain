@@ -1,4 +1,7 @@
+use std::fmt::Debug;
+
 use crate::get_platform_data;
+use crate::input::PadData;
 use crate::{ffi::FfiConfig, PlatformData};
 use render::Renderer;
 
@@ -55,8 +58,9 @@ impl Point {
     }
 }
 
-pub trait Widget {
+pub trait Widget: Debug {
     fn render(&self, base_pos: &Point, renderer: &Renderer<'_>);
+    fn handle_input(&self, inputs: PadData);
     fn get_width(&self) -> u32;
     fn get_height(&self) -> u32;
 }

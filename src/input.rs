@@ -1,5 +1,6 @@
 use std::ops::{Add, BitOr};
 
+#[derive(Clone, Copy, Debug)]
 pub struct PadData {
     buttons: u64,
 }
@@ -39,8 +40,13 @@ pub enum PadButton {
 }
 
 impl PadData {
-    pub fn contains(&self, other: &PadData) -> bool {
+    pub fn contains<P: Into<PadData>>(&self, other: P) -> bool {
+        let other = other.into();
         self.buttons & other.buttons == other.buttons
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.buttons == 0
     }
 }
 
@@ -95,6 +101,14 @@ impl BitOr for PadButton {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         self.add(rhs)
+    }
+}
+
+impl From<PadButton> for PadData {
+    fn from(button: PadButton) -> Self {
+        Self {
+            buttons: button as u64,
+        }
     }
 }
 
