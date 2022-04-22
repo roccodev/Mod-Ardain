@@ -6,9 +6,13 @@
 use std::{
     io::Cursor,
     lazy::SyncOnceCell,
-    sync::atomic::{AtomicBool, AtomicU32},
+    sync::{
+        atomic::{AtomicBool, AtomicU32},
+        RwLock,
+    },
 };
 
+use config::RuntimeConfig;
 use skyline::hooks::Region;
 
 use crate::{ffi::FfiConfig, ui::text::TextRenderer};
@@ -19,6 +23,7 @@ pub(crate) mod macros;
 mod config;
 pub(crate) mod ffi;
 pub mod input;
+mod module;
 pub mod ui;
 
 pub static VERSION_STRING: &str = concat!("Mod Ardain Ver. ", env!("CARGO_PKG_VERSION"), '\0');
@@ -31,6 +36,7 @@ pub struct PlatformData {
     pub ui_visible: AtomicBool,
     pub no_input_frames: AtomicU32,
     pub ffi_offsets: ffi::hooks::Offsets,
+    pub config: RwLock<RuntimeConfig>,
 }
 
 /// A pointer to read-only memory.
@@ -93,6 +99,7 @@ pub fn main() {
         ui_visible: AtomicBool::new(false),
         no_input_frames: AtomicU32::new(0),
         ffi_offsets: ffi::hooks::Offsets::read_all(&config),
+        config: RwLock::new(Default::default()),
     };
     STATE.set(state).unwrap();
     ui::load(&config, STATE.get().unwrap());

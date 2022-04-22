@@ -48,6 +48,10 @@ impl PadData {
     pub fn is_empty(&self) -> bool {
         self.buttons == 0
     }
+
+    pub fn is_click(&self) -> bool {
+        self.contains(PadButton::A)
+    }
 }
 
 impl PadButton {

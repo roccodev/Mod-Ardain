@@ -11,14 +11,12 @@ use super::{render::Renderer, Color4f, Point, Rect, Widget};
 
 pub type ListIndex = NonZeroUsize;
 
-#[derive(Debug)]
 pub struct Container {
     dimensions: (u32, u32),
     color: Color4f,
     children: Vec<Box<dyn Widget>>,
 }
 
-#[derive(Debug)]
 pub struct List {
     selectable: bool,
     selected: Cell<Option<NonZeroUsize>>,
@@ -65,6 +63,17 @@ impl List {
         );
         self.children.push(wrapped);
     }
+
+    pub fn append<I: IntoIterator<Item = Box<dyn Widget>>>(&mut self, widgets: I) {
+        for widget in widgets.into_iter() {
+            let wrapped = Container::new(
+                Color4f::default(),
+                (widget.get_width(), widget.get_height()),
+                vec![widget],
+            );
+            self.children.push(wrapped);
+        }
+    }
 }
 
 impl Widget for Container {
@@ -80,10 +89,14 @@ impl Widget for Container {
         }
     }
 
-    fn handle_input(&self, inputs: PadData) {
+    fn handle_input(&self, inputs: PadData) -> bool {
+        let mut handled = false;
         for child in &self.children {
-            child.handle_input(inputs);
+            if child.handle_input(inputs) {
+                handled = true;
+            }
         }
+        handled
     }
 
     fn get_width(&self) -> u32 {
@@ -115,9 +128,9 @@ impl Widget for List {
         }
     }
 
-    fn handle_input(&self, inputs: PadData) {
+    fn handle_input(&self, inputs: PadData) -> bool {
         if !self.selectable {
-            return;
+            return false;
         }
         if inputs.contains(PadButton::LeftStickDown) || inputs.contains(PadButton::DpadDown) {
             self.selected.update(|old| {
@@ -131,6 +144,7 @@ impl Widget for List {
                     Some(unsafe { NonZeroUsize::new_unchecked(new_index) })
                 }
             });
+            true
         } else if inputs.contains(PadButton::LeftStickUp) || inputs.contains(PadButton::DpadUp) {
             self.selected.update(|old| {
                 let new_index = old
@@ -144,10 +158,13 @@ impl Widget for List {
                     Some(unsafe { NonZeroUsize::new_unchecked(new_index) })
                 }
             });
+            true
         } else if let Some(selected) = self.selected.get() {
             // Propagate inputs to children
             let item = &self.children[selected.get() - 1];
-            item.handle_input(inputs);
+            item.handle_input(inputs)
+        } else {
+            false
         }
     }
 

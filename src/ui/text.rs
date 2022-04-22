@@ -135,8 +135,9 @@ impl<'s> Widget for TextWidget<'s> {
         renderer.text(point, &self.text);
     }
 
-    fn handle_input(&self, inputs: PadData) {
+    fn handle_input(&self, inputs: PadData) -> bool {
         // no-op
+        false
     }
 
     fn get_width(&self) -> u32 {

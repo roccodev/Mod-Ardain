@@ -86,7 +86,7 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
     let inputs = PadData::from(platform.ffi_offsets.input_register.get(inline_ctx));
     let can_input = platform.no_input_frames.fetch_add(1, Ordering::Relaxed) >= 10;
 
-    let had_input = if can_input {
+    let mut had_input = if can_input {
         if inputs.contains(PadButton::L + PadButton::LeftStickClick) {
             // Toggle UI visibility
             platform
@@ -114,13 +114,9 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
         false
     };
 
-    if had_input {
-        platform.no_input_frames.store(0, Ordering::Relaxed);
-    }
-
     if platform.ui_visible.load(Ordering::Relaxed) {
         if let Some(renderer) = crate::ui::get_renderer() {
-            crate::ui::overlay::render(
+            if crate::ui::overlay::render(
                 platform,
                 renderer,
                 if can_input {
@@ -129,8 +125,14 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
                 } else {
                     PadData::default()
                 },
-            );
+            ) {
+                had_input = true;
+            }
         }
+    }
+
+    if had_input {
+        platform.no_input_frames.store(0, Ordering::Relaxed);
     }
 }
 

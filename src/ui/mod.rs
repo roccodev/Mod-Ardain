@@ -7,7 +7,7 @@ use render::Renderer;
 
 pub mod container;
 pub mod overlay;
-mod render;
+pub mod render;
 pub mod text;
 
 #[repr(C)]
@@ -58,9 +58,9 @@ impl Point {
     }
 }
 
-pub trait Widget: Debug {
+pub trait Widget {
     fn render(&self, base_pos: &Point, renderer: &Renderer<'_>);
-    fn handle_input(&self, inputs: PadData);
+    fn handle_input(&self, inputs: PadData) -> bool;
     fn get_width(&self) -> u32;
     fn get_height(&self) -> u32;
 }
