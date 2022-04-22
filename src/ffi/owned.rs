@@ -62,6 +62,6 @@ impl<'p, O, F> FfiPointer<'p, O, F> {
 
 impl<'t, T> Drop for DestroyLater<'t, T> {
     fn drop(&mut self) {
-        unsafe { (self.destructor)(&mut self.inner, &self.platform) }
+        unsafe { (self.destructor)(&mut self.inner, self.platform) }
     }
 }

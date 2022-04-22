@@ -1,4 +1,4 @@
-use std::{cell::Cell, lazy::SyncOnceCell, sync::RwLock};
+use std::{lazy::SyncOnceCell, sync::RwLock};
 
 use skyline::libc::c_void;
 
@@ -54,32 +54,30 @@ impl<'p> Renderer<'p> {
     }
 
     pub fn rect(&self, rect: &Rect, color: &Color4f) {
-        match (self.get_foreign(), self.offsets.render_rect_fill) {
-            (Some(foreign), Some(draw_rect)) => {
-                self.color(color, foreign);
-                unsafe {
-                    offset_fn!(self.platform, draw_rect, (*const c_void, *const Rect))(
-                        foreign,
-                        rect as *const Rect,
-                    )
-                }
+        if let (Some(foreign), Some(draw_rect)) =
+            (self.get_foreign(), self.offsets.render_rect_fill)
+        {
+            self.color(color, foreign);
+            unsafe {
+                offset_fn!(self.platform, draw_rect, (*const c_void, *const Rect))(
+                    foreign,
+                    rect as *const Rect,
+                )
             }
-            _ => {}
         }
     }
 
     pub fn rect_outline(&self, rect: &Rect, color: &Color4f) {
-        match (self.get_foreign(), self.offsets.render_rect_outline) {
-            (Some(foreign), Some(rect_outline)) => {
-                self.color(color, foreign);
-                unsafe {
-                    offset_fn!(self.platform, rect_outline, (*const c_void, *const Rect))(
-                        foreign,
-                        rect as *const Rect,
-                    );
-                }
+        if let (Some(foreign), Some(rect_outline)) =
+            (self.get_foreign(), self.offsets.render_rect_outline)
+        {
+            self.color(color, foreign);
+            unsafe {
+                offset_fn!(self.platform, rect_outline, (*const c_void, *const Rect))(
+                    foreign,
+                    rect as *const Rect,
+                );
             }
-            _ => {}
         }
     }
 

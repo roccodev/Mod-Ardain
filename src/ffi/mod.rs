@@ -4,7 +4,6 @@ use serde::Deserialize;
 use skyline::hooks::InlineCtx;
 use skyline::hooks::{A64HookFunction, A64InlineHook};
 use skyline::libc::c_void;
-use std::convert::TryInto;
 
 pub mod hooks;
 pub mod owned;
@@ -75,9 +74,7 @@ impl Offset {
         callback: unsafe extern "C" fn(&mut InlineCtx),
     ) {
         A64InlineHook(
-            platform
-                .text_ptr
-                .offset::<c_void>(self.offset.try_into().unwrap()),
+            platform.text_ptr.offset::<c_void>(self.offset),
             callback as *const c_void,
         );
     }
@@ -89,9 +86,7 @@ impl Offset {
     ) -> *const c_void {
         let mut orig_fn: *mut c_void = std::ptr::null_mut();
         A64HookFunction(
-            platform
-                .text_ptr
-                .offset::<c_void>(self.offset.try_into().unwrap()),
+            platform.text_ptr.offset::<c_void>(self.offset),
             callback,
             &mut orig_fn as *mut *mut c_void,
         );

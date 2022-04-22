@@ -1,4 +1,4 @@
-use std::{convert::TryInto, ffi::CString, fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
+use std::{fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
 
 use crate::{
     ffi::{
@@ -7,11 +7,7 @@ use crate::{
     },
     get_platform_data,
     input::{PadButton, PadData},
-    ui::{container::Container, Color4f, Point, Rect},
-    ui::{
-        text::{Text, TextWidget},
-        Widget,
-    },
+    ui::Point,
     PlatformData, StaticPtr,
 };
 use skyline::{hooks::InlineCtx, libc::c_void};
@@ -104,7 +100,7 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
                 Some(return_title) => {
                     // 0xff_ff_ff_ff is always used in the executable (it's the save
                     // slot)
-                    std::mem::transmute::<_, extern "C" fn(u32)>(return_title.as_fn(&platform))(
+                    std::mem::transmute::<_, extern "C" fn(u32)>(return_title.as_fn(platform))(
                         0xff_ff_ff_ff,
                     );
                     true

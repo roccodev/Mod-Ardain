@@ -1,10 +1,9 @@
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 
 use skyline::libc::{c_char, c_void};
 
 use crate::{
     ffi::{FfiConfig, Offset},
-    get_platform_data,
     input::PadData,
     PlatformData,
 };

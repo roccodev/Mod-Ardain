@@ -9,34 +9,34 @@ pub struct PadData {
 #[derive(Clone, Copy, Debug)]
 #[allow(unused)]
 pub enum PadButton {
-    A = 4,                          // nn bit: 0x00
-    B = 2,                          // nn: 0x01
-    X = 8,                          // nn: 0x02
-    Y = 1,                          // nn: 0x03
-    L = 0x10,                       // nn: 0x06
-    R = 0x20,                       // nn: 0x07
-    ZL = 0x40,                      // nn: 0x08
-    ZR = 0x80,                      // nn: 0x09
-    DpadRight = 0x2000,             // nn: 0x0e
-    DpadLeft = 0x8000,              // nn: 0x0c
-    DpadUp = 0x1000,                // nn: 0x0d
-    DpadDown = 0x4000,              // nn: 0x0f
-    LeftStickClick = 0x400,         // nn: 0x04
-    RightStickClick = 0x800,        // nn: 0x05
-    Plus = 0x200,                   // nn: 0x0a
-    Minus = 0x100,                  // nn: 0x0b
-    LeftSL = 0x80000,               // nn: 0x18
-    LeftSR = 0x100000,              // nn: 0x19
-    RightSL = 0x200000,             // nn: 0x1a
-    RightSR = 0x400000,             // nn: 0x1b
-    LeftStickRight = 0x1_000_000,   // nn: 0x12
-    LeftStickUp = 0x800_000,        // nn: 0x11
-    LeftStickLeft = 0x4_000_000,    // nn: 0x10
-    LeftStickDown = 0x2_000_000,    // nn: 0x13
-    RightStickRight = 0x10_000_000, // nn: 0x16
-    RightStickUp = 0x8_000_000,     // nn: 0x15
-    RightStickLeft = 0x40_000_000,  // nn: 0x14
-    RightStickDown = 0x20_000_000,  // nn: 0x17
+    A = 4,                         // nn bit: 0x00
+    B = 2,                         // nn: 0x01
+    X = 8,                         // nn: 0x02
+    Y = 1,                         // nn: 0x03
+    L = 0x10,                      // nn: 0x06
+    R = 0x20,                      // nn: 0x07
+    ZL = 0x40,                     // nn: 0x08
+    ZR = 0x80,                     // nn: 0x09
+    DpadRight = 0x2000,            // nn: 0x0e
+    DpadLeft = 0x8000,             // nn: 0x0c
+    DpadUp = 0x1000,               // nn: 0x0d
+    DpadDown = 0x4000,             // nn: 0x0f
+    LeftStickClick = 0x400,        // nn: 0x04
+    RightStickClick = 0x800,       // nn: 0x05
+    Plus = 0x200,                  // nn: 0x0a
+    Minus = 0x100,                 // nn: 0x0b
+    LeftSL = 0x80000,              // nn: 0x18
+    LeftSR = 0x100000,             // nn: 0x19
+    RightSL = 0x200000,            // nn: 0x1a
+    RightSR = 0x400000,            // nn: 0x1b
+    LeftStickRight = 0x0100_0000,  // nn: 0x12
+    LeftStickUp = 0x800000,        // nn: 0x11
+    LeftStickLeft = 0x0400_0000,   // nn: 0x10
+    LeftStickDown = 0x0200_0000,   // nn: 0x13
+    RightStickRight = 0x1000_0000, // nn: 0x16
+    RightStickUp = 0x0800_0000,    // nn: 0x15
+    RightStickLeft = 0x4000_0000,  // nn: 0x14
+    RightStickDown = 0x2000_0000,  // nn: 0x17
 }
 
 impl PadData {

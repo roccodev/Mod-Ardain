@@ -22,7 +22,7 @@ pub(crate) fn render(platform: &PlatformData, renderer: &Renderer, inputs: PadDa
             match ui.get() {
                 Some(root) => root,
                 None => {
-                    init(platform, renderer, &ui);
+                    init(platform, renderer, ui);
                     ui.get().expect("ui not initialized")
                 }
             }

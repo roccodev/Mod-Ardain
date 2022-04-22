@@ -1,12 +1,11 @@
 use std::{
-    borrow::Cow,
     cell::Cell,
     convert::TryInto,
     fmt::Debug,
     num::{NonZeroU32, NonZeroUsize},
 };
 
-use crate::input::{self, PadButton, PadData};
+use crate::input::{PadButton, PadData};
 
 use super::{render::Renderer, Color4f, Point, Rect, Widget};
 
@@ -126,7 +125,7 @@ impl Widget for List {
                     .map(NonZeroUsize::get)
                     .unwrap_or_default()
                     .saturating_add(1);
-                if new_index - 1 >= self.children.len() {
+                if new_index > self.children.len() {
                     old
                 } else {
                     Some(unsafe { NonZeroUsize::new_unchecked(new_index) })
@@ -139,7 +138,7 @@ impl Widget for List {
                     .unwrap_or_default()
                     .saturating_sub(1)
                     .max(1);
-                if new_index - 1 >= self.children.len() {
+                if new_index > self.children.len() {
                     old
                 } else {
                     Some(unsafe { NonZeroUsize::new_unchecked(new_index) })

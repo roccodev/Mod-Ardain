@@ -6,19 +6,12 @@
 use std::{
     io::Cursor,
     lazy::SyncOnceCell,
-    ops::Add,
     sync::atomic::{AtomicBool, AtomicU32},
 };
 
-use skyline::{
-    hooks::{InlineCtx, Region},
-    libc::c_void,
-};
+use skyline::hooks::Region;
 
-use crate::{
-    ffi::FfiConfig,
-    ui::{text::TextRenderer, Color4f, Point, Rect},
-};
+use crate::{ffi::FfiConfig, ui::text::TextRenderer};
 
 #[macro_use]
 pub(crate) mod macros;
@@ -58,7 +51,7 @@ impl StaticPtr {
     /// This function (and the resulting pointer) is safe if `ptr` points to
     /// valid, read-only memory.
     pub unsafe fn copy_of<T>(ptr: *const T) -> Self {
-        Self(ptr.clone().cast())
+        Self(ptr.cast())
     }
 
     pub fn offset<T>(&self, addr: isize) -> *const T {
@@ -106,7 +99,7 @@ pub fn main() {
 
     println!("[XC2MM] Installing hooks");
     unsafe {
-        ffi::hooks::install_all(&STATE.get().unwrap(), &config);
+        ffi::hooks::install_all(STATE.get().unwrap(), &config);
     }
 
     println!("[XC2MM] Loaded!");
