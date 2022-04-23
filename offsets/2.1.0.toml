@@ -1,8 +1,8 @@
 # Function hooks, values are the instruction address to hook.
 [hooks]
 # Input/frame hook, this is right before the game checks for the emergency escape input sequence
-# (L+R+ZL+ZR+X+Down). Pressed buttons in w8
-input = 0x00_2b_58_dc# #0x
+# (L+R+ZL+ZR+X+Down). Pointer to pressed buttons in x0
+input = 0x00_2b_58_80
 # The save function from the "create blade" (resonance) menu.
 # This function can be NOPed to prevent saves and to speed up the animation.
 blade-create-save = 0x00_39_75_54
@@ -55,7 +55,7 @@ render-scr-height = 0x00_69_73_64
 # Format: [register type, register index]
 # Example: x1 = [x, 1]
 [registers]
-input-pad-data = ['w', 8]
+input-pad-data = ['x', 0]
 bdat-item-cond-id = ['w', 23]
 bdat-item-cond-type = ['w', 24]
 chain-attack-rate-branch = ['w', 12]

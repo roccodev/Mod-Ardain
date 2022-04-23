@@ -83,7 +83,8 @@ pub(crate) unsafe fn install_all(platform: &PlatformData, config: &FfiConfig) {
 /// register.
 unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
     let platform = crate::get_platform_data();
-    let inputs = PadData::from(platform.ffi_offsets.input_register.get(inline_ctx));
+    let inputs_ptr = platform.ffi_offsets.input_register.get(inline_ctx) as *mut u32;
+    let inputs = PadData::from(*inputs_ptr as u64);
     let can_input = platform.no_input_frames.fetch_add(1, Ordering::Relaxed) >= 10;
 
     let mut had_input = if can_input {
@@ -120,7 +121,6 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
                 platform,
                 renderer,
                 if can_input {
-                    // TODO: Disable in-game inputs
                     inputs
                 } else {
                     PadData::default()
@@ -133,6 +133,7 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
 
     if had_input {
         platform.no_input_frames.store(0, Ordering::Relaxed);
+        *inputs_ptr = 0; // Disable in-game inputs
     }
 }
 
