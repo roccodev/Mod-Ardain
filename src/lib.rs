@@ -71,6 +71,16 @@ impl StaticPtr {
     }
 }
 
+impl PlatformData {
+    pub fn is_enabled<E>(&self, extract: E) -> bool
+    where
+        E: Fn(&RuntimeConfig) -> bool,
+    {
+        let cfg = self.config.read().unwrap();
+        (extract)(&cfg)
+    }
+}
+
 #[skyline::main(name = "xc2_mod_menu")]
 pub fn main() {
     println!("[XC2MM] Loading...");

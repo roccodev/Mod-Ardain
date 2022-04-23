@@ -9,14 +9,15 @@ use crate::ui::{
     Color4f, Point, Widget,
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RuntimeConfig {
     pub ui_visible: bool,
-    pub blade_create_enable_save: bool,
-    return_title: bool,
-    infinite_flutterheart: bool,
-    chain_attack_rate_fix: bool,
-    blade_create_default_sel: BladeCreateDefault,
+    pub blade_create_disable_save: bool,
+    pub return_title: bool,
+    pub infinite_flutterheart: bool,
+    pub chain_attack_rate_fix: bool,
+    pub blade_create_show_total: bool,
+    //blade_create_default_sel: BladeCreateDefault,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy)]
@@ -38,11 +39,12 @@ impl Default for RuntimeConfig {
     fn default() -> Self {
         Self {
             ui_visible: true,
-            blade_create_enable_save: true,
+            blade_create_disable_save: false,
             return_title: true,
             infinite_flutterheart: true,
             chain_attack_rate_fix: true,
-            blade_create_default_sel: BladeCreateDefault::Best,
+            blade_create_show_total: true,
+            // blade_create_default_sel: BladeCreateDefault::Best,
         }
     }
 }
@@ -65,10 +67,13 @@ macro_rules! cfg_entry {
 }
 
 pub fn get_ui_widgets() -> Vec<Box<dyn Widget>> {
-    let item = cfg_entry!("Show UI", ui_visible);
     vec![
-        item,
-        cfg_entry!("Enable Save in Create Blade", blade_create_enable_save),
+        cfg_entry!("Show UI", ui_visible),
+        cfg_entry!("Create Blade: Disable Save", blade_create_disable_save),
+        cfg_entry!("Create Blade: Show Blade Count", blade_create_show_total),
+        cfg_entry!("Enable Return to Title Combo", return_title),
+        cfg_entry!("Infinite Max Flutterheart Grass", infinite_flutterheart),
+        cfg_entry!("Fix Chain Attack Damage Rate", chain_attack_rate_fix),
     ]
 }
 

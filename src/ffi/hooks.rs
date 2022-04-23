@@ -14,6 +14,7 @@ use skyline::{hooks::InlineCtx, libc::c_void};
 
 use super::ui::UiOffsets;
 
+static BLADE_CREATE_SAVE_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
 static KEY_ITEM_MAX_QTY_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
 
 #[derive(Debug, Clone, Copy)]
@@ -59,7 +60,11 @@ pub(crate) unsafe fn install_all(platform: &PlatformData, config: &FfiConfig) {
         hook.patch_inline(platform, on_frame);
     }
     if let Some(hook) = config.get_hook("blade-create-save") {
-        hook.patch(platform, blade_create_disable_save as *const c_void);
+        BLADE_CREATE_SAVE_ORIG
+            .set(StaticPtr::copy_of(
+                hook.patch(platform, blade_create_disable_save as *const c_void),
+            ))
+            .unwrap();
     }
     if let Some(hook) = config.get_hook("bdat-item-condition") {
         hook.patch_inline(platform, bdat_item_condition);
@@ -137,8 +142,14 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
     }
 }
 
-unsafe extern "C" fn blade_create_disable_save(_save_slot: i64) -> i64 {
-    1
+unsafe extern "C" fn blade_create_disable_save(save_slot: i64) -> i64 {
+    if get_platform_data().is_enabled(|c| c.blade_create_disable_save) {
+        1
+    } else {
+        let orig: extern "C" fn(i64) -> i64 =
+            std::mem::transmute(BLADE_CREATE_SAVE_ORIG.get().unwrap().inner() as *const ());
+        (orig)(save_slot)
+    }
 }
 
 /// Part 1 of allowing more than one "Flutterheart Grass" (the item needed to
@@ -151,6 +162,10 @@ unsafe extern "C" fn blade_create_disable_save(_save_slot: i64) -> i64 {
 /// See: <https://xenoblade.github.io/xb2/bdat/common/FLD_ConditionList.html#2848>
 unsafe extern "C" fn bdat_item_condition(inline_ctx: &mut InlineCtx) {
     let platform = get_platform_data();
+
+    if !platform.is_enabled(|c| c.infinite_flutterheart) {
+        return;
+    }
 
     if let Some(id) = platform.ffi_offsets.bdat_item_id.map(|i| i.get(inline_ctx)) {
         if id == 300 {
@@ -167,7 +182,7 @@ unsafe extern "C" fn bdat_item_condition(inline_ctx: &mut InlineCtx) {
 }
 
 unsafe extern "C" fn key_item_max_quantity(ptr: u64, id: u32) -> u64 {
-    if id == 25447 {
+    if id == 25447 && get_platform_data().is_enabled(|c| c.infinite_flutterheart) {
         // Flutterheart Grass
         99
     } else {
@@ -178,6 +193,12 @@ unsafe extern "C" fn key_item_max_quantity(ptr: u64, id: u32) -> u64 {
 }
 
 unsafe extern "C" fn chain_attack_rate_fix(inline_ctx: &mut InlineCtx) {
+    let platform = get_platform_data();
+
+    if !platform.is_enabled(|c| c.chain_attack_rate_fix) {
+        return;
+    }
+
     // When "Enemy Attack Power" is > 1.0 and the number of "Cancel Attacks" is > 0,
     // the chain attack base damage rate glitches out to 100%, regardless of any
     // other bonuses.
