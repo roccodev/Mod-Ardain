@@ -27,6 +27,7 @@ draw-font = 0x00_16_a2_58
 draw-font-color = 0x00_16_a3_3c
 draw-font-scale = 0x00_69_fd_bc
 draw-square-2d = 0x00_16_a4_48
+draw-line-2d = 0x00_16_a3_d4
 # When set to false, ignores Z coordinate and always draws on top
 draw-compare-z = 0x00_16_a9_44
 # UIObjectAcc (constructor)
@@ -45,7 +46,6 @@ ui-str-con = 0x00_69_49_20
 ui-str-des = 0x00_69_49_5c
 render-get = 0x00_69_8b_6c
 render-set-color = 0x00_69_d0_5c
-render-rect-fill = 0x00_69_d4_e8
 render-rect-outline = 0x00_6a_65_d0
 render-scr-width = 0x00_69_73_38
 render-scr-height = 0x00_69_73_64

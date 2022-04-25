@@ -6,7 +6,7 @@ use super::{
     container::{Container, List, ListHandler, ListIndex},
     render::Renderer,
     text::{Text, TextWidget},
-    Color4f, Point, Widget,
+    Color4f, Line, Point, Widget,
 };
 
 #[derive(Debug)]
@@ -55,13 +55,19 @@ fn init(platform: &PlatformData, renderer: &Renderer, dest: &OnceCell<RefCell<Co
         Point::new(10, 10),
     );
 
+    let separator = Line::new(
+        (100, 10),
+        (100, (screen.1 - 10) as i32),
+        Color4f::from_rgba(1.0, 1.0, 1.0, 1.0),
+    );
+
     let mut test_list = List::new(true, None, box ModulesHandler);
     test_list.append(crate::config::get_ui_widgets());
 
     let root = Container::new(
         Color4f::from_rgba(0.0, 0.0, 0.0, 0.7),
         (half_width, screen.1),
-        vec![box title, box test_list],
+        vec![box title, box test_list, box separator],
     );
     if dest.set(RefCell::new(root)).is_err() {
         panic!("Couldn't init UI");

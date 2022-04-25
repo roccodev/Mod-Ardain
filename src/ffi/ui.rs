@@ -124,16 +124,16 @@ impl<'p> UIObjectAcc<'p> {
         }
     }
 
-    pub fn set_pos(&self, pos: Point) {
+    pub fn set_pos(&self, pos: Point<i16>) {
         unsafe {
-            (std::mem::transmute::<_, extern "C" fn(*const c_void, *const Point)>(
+            (std::mem::transmute::<_, extern "C" fn(*const c_void, *const Point<i16>)>(
                 self.platform
                     .ffi_offsets
                     .ui_offsets
                     .unwrap()
                     .ui_acc_set_pos
                     .as_fn(self.platform),
-            ))(self.ptr.as_ptr(), &pos as *const Point);
+            ))(self.ptr.as_ptr(), &pos as *const _);
         }
     }
 

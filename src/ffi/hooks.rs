@@ -27,6 +27,7 @@ pub struct Offsets {
     chain_attack_rate_branch: Option<Register>,
     title_root_register: Option<Register>,
     pub draw_square_2d: Option<Offset>,
+    pub draw_line_2d: Option<Offset>,
     draw_compare_z: Option<Offset>,
     pub ui_offsets: Option<UiOffsets>,
 }
@@ -53,6 +54,7 @@ impl Offsets {
             chain_attack_rate_branch: config.get_register("chain-attack-rate-branch"),
             title_root_register: config.get_register("title-root"),
             draw_square_2d: config.get_function("draw-square-2d"),
+            draw_line_2d: config.get_function("draw-line-2d"),
             draw_compare_z: config.get_function("draw-compare-z"),
             ui_offsets,
         }
@@ -232,7 +234,7 @@ unsafe extern "C" fn title_screen_load(inline_ctx: &mut InlineCtx) {
 
                 // It's important that we set the position first, as setting
                 // the text shifts the object to keep horizontal alignment.
-                dup.set_pos(Point::new(920, 60));
+                dup.set_pos(Point::<i16>::new(920, 60));
                 dup.set_text(&text);
             }
         }

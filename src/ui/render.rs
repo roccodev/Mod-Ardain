@@ -2,7 +2,7 @@ use std::{lazy::SyncOnceCell, sync::RwLock};
 
 use skyline::libc::c_void;
 
-use super::{text::Text, Color4f, Point, Rect};
+use super::{text::Text, Color4f, Line, Point, Rect};
 
 pub(in crate::ui) static RENDERER: SyncOnceCell<Renderer<'static>> = SyncOnceCell::new();
 
@@ -22,7 +22,6 @@ pub struct Renderer<'p> {
 struct Offsets {
     deb_draw_get: Offset,
     set_color: Option<Offset>,
-    render_rect_fill: Option<Offset>,
     render_rect_outline: Option<Offset>,
     get_screen_width: Option<Offset>,
     get_screen_height: Option<Offset>,
@@ -35,7 +34,6 @@ impl<'p> Renderer<'p> {
                 .get_function("render-get")
                 .expect("no render get function"),
             set_color: config.get_function("render-set-color"),
-            render_rect_fill: config.get_function("render-rect-fill"),
             render_rect_outline: config.get_function("render-rect-outline"),
             get_screen_width: config.get_function("render-scr-width"),
             get_screen_height: config.get_function("render-scr-height"),
@@ -54,17 +52,7 @@ impl<'p> Renderer<'p> {
     }
 
     pub fn rect(&self, rect: &Rect, color: &Color4f) {
-        if let (Some(foreign), Some(draw_rect)) =
-            (self.get_foreign(), self.offsets.render_rect_fill)
-        {
-            self.color(color, foreign);
-            unsafe {
-                offset_fn!(self.platform, draw_rect, (*const c_void, *const Rect))(
-                    foreign,
-                    rect as *const Rect,
-                )
-            }
-        }
+        rect.render(color)
     }
 
     pub fn rect_outline(&self, rect: &Rect, color: &Color4f) {
@@ -79,6 +67,10 @@ impl<'p> Renderer<'p> {
                 );
             }
         }
+    }
+
+    pub fn line(&self, line: &Line) {
+        line.render()
     }
 
     pub fn get_screen_dimensions(&self) -> (u32, u32) {
