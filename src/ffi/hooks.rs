@@ -21,6 +21,7 @@ static KEY_ITEM_MAX_QTY_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
 pub struct Offsets {
     return_title: Option<Offset>,
     input_register: Register,
+    input_struct_len: Register,
     bdat_item_id: Option<Register>,
     bdat_item_type: Option<Register>,
     chain_attack_rate_branch: Option<Register>,
@@ -44,6 +45,9 @@ impl Offsets {
             input_register: config
                 .get_register("input-pad-data")
                 .expect("input offset required"),
+            input_struct_len: config
+                .get_register("input-pad-data-len")
+                .expect("input struct len required"),
             bdat_item_id: config.get_register("bdat-item-cond-id"),
             bdat_item_type: config.get_register("bdat-item-cond-type"),
             chain_attack_rate_branch: config.get_register("chain-attack-rate-branch"),
@@ -100,7 +104,9 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
                 .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |b| Some(!b))
                 .ok();
             true
-        } else if inputs.contains(PadButton::L + PadButton::R + PadButton::A + PadButton::Plus) {
+        } else if inputs.contains(PadButton::L + PadButton::R + PadButton::A + PadButton::Plus)
+            && platform.is_enabled(|c| c.return_title)
+        {
             // Return to title
             match platform.ffi_offsets.return_title {
                 Some(return_title) => {
@@ -133,12 +139,14 @@ unsafe extern "C" fn on_frame(inline_ctx: &mut InlineCtx) {
             ) {
                 had_input = true;
             }
+            // Disable in-game inputs
+            let struct_len = platform.ffi_offsets.input_struct_len.get(&inline_ctx);
+            std::ptr::write_bytes(inputs_ptr as *mut u8, 0, struct_len as usize);
         }
     }
 
     if had_input {
         platform.no_input_frames.store(0, Ordering::Relaxed);
-        *inputs_ptr = 0; // Disable in-game inputs
     }
 }
 
