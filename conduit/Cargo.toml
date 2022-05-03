@@ -1,0 +1,11 @@
+[package]
+name = "conduit"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+xenolib = { path = "./xenolib" }
+
+[features]
+xc2 = []
+xcde = []
