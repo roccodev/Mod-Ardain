@@ -1,5 +1,5 @@
 [package]
-name = "mod-ardain-xc2"
+name = "mod-ardain-xc3"
 version = "0.1.0"
 authors = ["RoccoDev <hey@rocco.dev>"]
 edition = "2021"
@@ -7,8 +7,8 @@ license = "GPL-3.0"
 publish = false
 
 [package.metadata.skyline]
-titleid = "0100E95004038000" # Xenoblade Chronicles 2
-custom-npdm = "npdm/xc2.npdm"
+titleid = "010074F013262000" # Xenoblade Chronicles 3
+custom-npdm = "npdm/xc3.npdm"
 
 [lib]
 crate-type = ["cdylib"]
@@ -17,13 +17,14 @@ crate-type = ["cdylib"]
 conduit = { path = "../conduit", features = ["xc2"] }
 skyline = { git = "https://github.com/ultimate-research/skyline-rs.git" }
 serde = { version = "1.0", features = ["derive"] }
-hashbrown = { version = "0.11", features = ["serde"] }
-ciborium = "0.1"
+hashbrown = { version = "0.12", features = ["serde"] }
+ciborium = "0.2"
 
 [build-dependencies]
 toml = "0.5"
-ciborium = "0.1"
+ciborium = "0.2"
 serde = { version = "1.0", features = ["derive"] }
+
 
 [profile.dev]
 panic = "abort"

@@ -3,5 +3,6 @@ members = [
   "conduit",
   "conduit/xenolib",
   "xc2",
-  "xcde"
+  "xcde",
+  "xc3"
 ]

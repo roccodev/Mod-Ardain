@@ -1,4 +1,4 @@
-use std::{fmt::Debug, lazy::SyncOnceCell, sync::atomic::Ordering};
+use std::{fmt::Debug, sync::atomic::Ordering, sync::OnceLock};
 
 use crate::{
     ffi::{
@@ -14,8 +14,8 @@ use skyline::{hooks::InlineCtx, libc::c_void};
 
 use super::ui::UiOffsets;
 
-static BLADE_CREATE_SAVE_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
-static KEY_ITEM_MAX_QTY_ORIG: SyncOnceCell<StaticPtr> = SyncOnceCell::new();
+static BLADE_CREATE_SAVE_ORIG: OnceLock<StaticPtr> = OnceLock::new();
+static KEY_ITEM_MAX_QTY_ORIG: OnceLock<StaticPtr> = OnceLock::new();
 
 #[derive(Debug, Clone, Copy)]
 pub struct Offsets {

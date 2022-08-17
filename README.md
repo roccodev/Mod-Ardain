@@ -1,5 +1,5 @@
-# Mod Ardain - XC2 Mod Menu
-Mod Ardain is a general modification for Xenoblade Chronicles 2.
+# Mod Ardain - XC2/3/DE Mod Menu
+Mod Ardain is a general modification for the Xenoblade Chronicles games on the Nintendo Switch.
 
 ## Features
 

@@ -1,0 +1,5 @@
+[xc3]
+# Game version, can be changed with the "XC3_VER" environment variable
+version = "1.1.0"
+
+[defaults]

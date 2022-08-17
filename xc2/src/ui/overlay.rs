@@ -1,4 +1,4 @@
-use std::{cell::RefCell, convert::TryInto, lazy::OnceCell, sync::atomic::AtomicBool};
+use std::{cell::OnceCell, cell::RefCell, convert::TryInto, sync::atomic::AtomicBool};
 
 use crate::{input::PadData, PlatformData};
 

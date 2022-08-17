@@ -1,10 +1,10 @@
-use std::{lazy::SyncOnceCell, sync::RwLock};
+use std::{sync::OnceLock, sync::RwLock};
 
 use skyline::libc::c_void;
 
 use super::{text::Text, Color4f, Line, Point, Rect};
 
-pub(in crate::ui) static RENDERER: SyncOnceCell<Renderer<'static>> = SyncOnceCell::new();
+pub(in crate::ui) static RENDERER: OnceLock<Renderer<'static>> = OnceLock::new();
 
 use crate::{
     ffi::{FfiConfig, Offset},

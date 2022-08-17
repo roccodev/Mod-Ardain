@@ -5,10 +5,9 @@
 
 use std::{
     io::Cursor,
-    lazy::SyncOnceCell,
     sync::{
         atomic::{AtomicBool, AtomicU32},
-        RwLock,
+        OnceLock, RwLock,
     },
 };
 
@@ -27,7 +26,7 @@ mod module;
 pub mod ui;
 
 pub static VERSION_STRING: &str = concat!("Mod Ardain Ver. ", env!("CARGO_PKG_VERSION"), '\0');
-static STATE: SyncOnceCell<PlatformData> = SyncOnceCell::new();
+static STATE: OnceLock<PlatformData> = OnceLock::new();
 
 #[derive(Debug)]
 pub struct PlatformData {
@@ -81,7 +80,7 @@ impl PlatformData {
     }
 }
 
-#[skyline::main(name = "xc2_mod_menu")]
+#[skyline::main(name = "mod_ardain_xc2")]
 pub fn main() {
     println!("[XC2MM] Loading...");
 

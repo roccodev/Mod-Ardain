@@ -2,13 +2,12 @@
 name = "mod-ardain-xcde"
 version = "0.1.0"
 authors = ["RoccoDev <hey@rocco.dev>"]
-edition = "2018"
+edition = "2021"
 license = "GPL-3.0"
 publish = false
 
 [package.metadata.skyline]
 titleid = "0100FF500E34A000" # Xenoblade Chronicles: Definitive Edition
-custom-npdm = "npdm/xc2.npdm"
 
 [lib]
 crate-type = ["cdylib"]
